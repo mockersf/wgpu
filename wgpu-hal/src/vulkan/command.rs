@@ -1,8 +1,7 @@
-use super::conv;
+use super::{consume_through_smallvec, conv};
 
 use arrayvec::ArrayVec;
 use ash::{extensions::ext, vk};
-use inplace_it::inplace_or_alloc_from_iter;
 
 use std::{mem, ops::Range, slice};
 
@@ -208,7 +207,7 @@ impl crate::CommandEncoder<super::Api> for super::CommandEncoder {
             size: r.size.get(),
         });
 
-        inplace_or_alloc_from_iter(vk_regions_iter, |vk_regions| {
+        consume_through_smallvec(vk_regions_iter, |vk_regions| {
             self.device
                 .raw
                 .cmd_copy_buffer(self.active, src.raw, dst.raw, vk_regions)
@@ -244,7 +243,7 @@ impl crate::CommandEncoder<super::Api> for super::CommandEncoder {
             }
         });
 
-        inplace_or_alloc_from_iter(vk_regions_iter, |vk_regions| {
+        consume_through_smallvec(vk_regions_iter, |vk_regions| {
             self.device.raw.cmd_copy_image(
                 self.active,
                 src.raw,
@@ -266,7 +265,7 @@ impl crate::CommandEncoder<super::Api> for super::CommandEncoder {
     {
         let vk_regions_iter = dst.map_buffer_copies(regions);
 
-        inplace_or_alloc_from_iter(vk_regions_iter, |vk_regions| {
+        consume_through_smallvec(vk_regions_iter, |vk_regions| {
             self.device.raw.cmd_copy_buffer_to_image(
                 self.active,
                 src.raw,
@@ -289,7 +288,7 @@ impl crate::CommandEncoder<super::Api> for super::CommandEncoder {
         let src_layout = conv::derive_image_layout(src_usage, src.aspects);
         let vk_regions_iter = src.map_buffer_copies(regions);
 
-        inplace_or_alloc_from_iter(vk_regions_iter, |vk_regions| {
+        consume_through_smallvec(vk_regions_iter, |vk_regions| {
             self.device.raw.cmd_copy_image_to_buffer(
                 self.active,
                 src.raw,

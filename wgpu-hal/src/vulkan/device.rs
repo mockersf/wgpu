@@ -1,8 +1,7 @@
-use super::conv;
+use super::{consume_through_smallvec, conv};
 
 use arrayvec::ArrayVec;
 use ash::{extensions::khr, vk};
-use inplace_it::inplace_or_alloc_from_iter;
 use parking_lot::Mutex;
 
 use std::{
@@ -462,7 +461,7 @@ impl
         layouts: impl ExactSizeIterator<Item = &'a vk::DescriptorSetLayout>,
         sets: &mut impl Extend<vk::DescriptorSet>,
     ) -> Result<(), gpu_descriptor::DeviceAllocationError> {
-        let result = inplace_or_alloc_from_iter(layouts.cloned(), |layouts_slice| {
+        let result = consume_through_smallvec(layouts.cloned(), |layouts_slice| {
             let vk_info = vk::DescriptorSetAllocateInfo::builder()
                 .descriptor_pool(*pool)
                 .set_layouts(layouts_slice)
@@ -497,7 +496,7 @@ impl
         pool: &mut vk::DescriptorPool,
         sets: impl Iterator<Item = vk::DescriptorSet>,
     ) {
-        let result = inplace_or_alloc_from_iter(sets, |sets_slice| {
+        let result = consume_through_smallvec(sets, |sets_slice| {
             self.raw.free_descriptor_sets(*pool, sets_slice)
         });
         match result {
@@ -827,7 +826,7 @@ impl crate::Device<super::Api> for super::Device {
         I: Iterator<Item = crate::MemoryRange>,
     {
         let vk_ranges = self.shared.make_memory_ranges(buffer, ranges);
-        inplace_or_alloc_from_iter(vk_ranges, |array| {
+        consume_through_smallvec(vk_ranges, |array| {
             self.shared.raw.flush_mapped_memory_ranges(array).unwrap()
         });
     }
@@ -836,7 +835,7 @@ impl crate::Device<super::Api> for super::Device {
         I: Iterator<Item = crate::MemoryRange>,
     {
         let vk_ranges = self.shared.make_memory_ranges(buffer, ranges);
-        inplace_or_alloc_from_iter(vk_ranges, |array| {
+        consume_through_smallvec(vk_ranges, |array| {
             self.shared
                 .raw
                 .invalidate_mapped_memory_ranges(array)
@@ -1123,7 +1122,7 @@ impl crate::Device<super::Api> for super::Device {
             }
         }
 
-        //Note: not bothering with inplace_or_alloc_from_iter her as it's low frequency
+        //Note: not bothering with consume_through_smallvec here as it's low frequency
         let vk_bindings = desc
             .entries
             .iter()
@@ -1235,7 +1234,7 @@ impl crate::Device<super::Api> for super::Device {
         &self,
         desc: &crate::PipelineLayoutDescriptor<super::Api>,
     ) -> Result<super::PipelineLayout, crate::DeviceError> {
-        //Note: not bothering with inplace_or_alloc_from_iter her as it's low frequency
+        //Note: not bothering with consume_through_smallvec here as it's low frequency
         let vk_set_layouts = desc
             .bind_group_layouts
             .iter()

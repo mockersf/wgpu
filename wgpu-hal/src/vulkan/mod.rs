@@ -686,3 +686,55 @@ impl From<vk::Result> for crate::DeviceError {
         }
     }
 }
+
+pub(crate) fn consume_through_smallvec<Iter, Consumer, R>(i: Iter, consumer: Consumer) -> R
+where
+    Iter: Iterator,
+    Consumer: FnOnce(&[Iter::Item]) -> R,
+{
+    macro_rules! consume {
+        ($size: expr) => {{
+            consumer(&smallvec::SmallVec::<[Iter::Item; $size]>::from_iter(i))
+        }};
+    }
+
+    match i.size_hint().1.unwrap_or(32) {
+        0 => consume!(0),
+        1 => consume!(1),
+        2 => consume!(2),
+        3 => consume!(3),
+        4 => consume!(4),
+        5 => consume!(5),
+        6 => consume!(6),
+        7 => consume!(7),
+        8 => consume!(8),
+        9 => consume!(9),
+        10 => consume!(10),
+        11 => consume!(11),
+        12 => consume!(12),
+        13 => consume!(13),
+        14 => consume!(14),
+        15 => consume!(15),
+        16 => consume!(16),
+        17 => consume!(17),
+        18 => consume!(18),
+        19 => consume!(19),
+        20 => consume!(20),
+        21 => consume!(21),
+        22 => consume!(22),
+        23 => consume!(23),
+        24 => consume!(24),
+        25 => consume!(25),
+        26 => consume!(26),
+        27 => consume!(27),
+        28 => consume!(28),
+        29 => consume!(29),
+        30 => consume!(30),
+        31 => consume!(31),
+        32 => consume!(32),
+        33..=64 => consume!(64),
+        65..=96 => consume!(96),
+        97..=128 => consume!(128),
+        _ => consume!(32),
+    }
+}
