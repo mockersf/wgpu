@@ -508,8 +508,8 @@ impl super::Adapter {
                 "Detected skylake derivative running on mesa i915. Clears to srgb textures will \
                 use manual shader clears."
             );
-            workarounds.set(super::Workarounds::MESA_I915_SRGB_SHADER_CLEAR, true);
         }
+        workarounds.set(super::Workarounds::MESA_I915_SRGB_SHADER_CLEAR, true);
 
         let downlevel_defaults = wgt::DownlevelLimits {};
 
