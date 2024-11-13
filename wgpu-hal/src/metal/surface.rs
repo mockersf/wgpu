@@ -206,7 +206,7 @@ impl super::Surface {
             let new_layer: *mut Object = msg_send![class!(CAMetalLayer), new];
             let () = msg_send![root_layer, addSublayer: new_layer];
 
-            #[cfg(not(target_os = "ios"))]
+            #[cfg(target_os = "macos")]
             {
                 // Automatically resize the sublayer's frame to match the
                 // superlayer's bounds.
