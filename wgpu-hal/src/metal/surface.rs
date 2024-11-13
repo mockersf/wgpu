@@ -207,23 +207,26 @@ impl super::Surface {
             let new_layer: *mut Object = msg_send![class!(CAMetalLayer), new];
             let () = msg_send![root_layer, addSublayer: new_layer];
 
-            // Automatically resize the sublayer's frame to match the
-            // superlayer's bounds.
-            //
-            // Note that there is a somewhat hidden design decision in this:
-            // We define the `width` and `height` in `configure` to control
-            // the `drawableSize` of the layer, while `bounds` and `frame` are
-            // outside of the user's direct control - instead, though, they
-            // can control the size of the view (or root layer), and get the
-            // desired effect that way.
-            //
-            // We _could_ also let `configure` set the `bounds` size, however
-            // that would be inconsistent with using the root layer directly
-            // (as we may do, see above).
-            let width_sizable = 1 << 1; // kCALayerWidthSizable
-            let height_sizable = 1 << 4; // kCALayerHeightSizable
-            let mask: c_uint = width_sizable | height_sizable;
-            let () = msg_send![new_layer, setAutoresizingMask: mask];
+            #[cfg(not(target_os = "ios"))]
+            {
+                // Automatically resize the sublayer's frame to match the
+                // superlayer's bounds.
+                //
+                // Note that there is a somewhat hidden design decision in this:
+                // We define the `width` and `height` in `configure` to control
+                // the `drawableSize` of the layer, while `bounds` and `frame` are
+                // outside of the user's direct control - instead, though, they
+                // can control the size of the view (or root layer), and get the
+                // desired effect that way.
+                //
+                // We _could_ also let `configure` set the `bounds` size, however
+                // that would be inconsistent with using the root layer directly
+                // (as we may do, see above).
+                let width_sizable = 1 << 1; // kCALayerWidthSizable
+                let height_sizable = 1 << 4; // kCALayerHeightSizable
+                let mask: c_uint = width_sizable | height_sizable;
+                let () = msg_send![new_layer, setAutoresizingMask: mask];
+            }
 
             // Specify the relative size that the auto resizing mask above
             // will keep (i.e. tell it to fill out its superlayer).
