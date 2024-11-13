@@ -1,6 +1,5 @@
 #![allow(clippy::let_unit_value)] // `let () =` being used to constrain result type
 
-use std::ffi::c_uint;
 use std::mem::ManuallyDrop;
 use std::ptr::NonNull;
 use std::sync::Once;
@@ -224,7 +223,7 @@ impl super::Surface {
                 // (as we may do, see above).
                 let width_sizable = 1 << 1; // kCALayerWidthSizable
                 let height_sizable = 1 << 4; // kCALayerHeightSizable
-                let mask: c_uint = width_sizable | height_sizable;
+                let mask: std::ffi::c_uint = width_sizable | height_sizable;
                 let () = msg_send![new_layer, setAutoresizingMask: mask];
             }
 
