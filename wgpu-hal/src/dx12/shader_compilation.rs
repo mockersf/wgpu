@@ -100,7 +100,7 @@ struct DxcLib {
 
 impl DxcLib {
     fn new_dynamic(lib_path: PathBuf) -> Result<Self, libloading::Error> {
-        unsafe { crate::dx12::DynLib::new(lib_path).map(|lib| Self { lib }) }
+        dbg!(unsafe { crate::dx12::DynLib::new(lib_path).map(|lib| Self { lib }) })
     }
 
     pub fn create_instance<T: DxcObj>(&self) -> Result<T, crate::DeviceError> {

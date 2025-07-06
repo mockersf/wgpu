@@ -74,12 +74,15 @@ impl crate::Instance for super::Instance {
                 max_shader_model,
             } => {
                 let container = super::shader_compilation::get_dynamic_dxc_container(
-                    dxc_path.into(),
-                    dxil_path.into(),
-                    max_shader_model,
+                    dbg!(dxc_path.into()),
+                    dbg!(dxil_path.into()),
+                    dbg!(max_shader_model),
                 )
                 .map_err(|e| {
-                    crate::InstanceError::with_source(String::from("Failed to load dynamic DXC"), e)
+                    crate::InstanceError::with_source(
+                        dbg!(String::from("Failed to load dynamic DXC")),
+                        dbg!(e),
+                    )
                 })?;
 
                 Some(Arc::new(container))
@@ -99,8 +102,8 @@ impl crate::Instance for super::Instance {
         };
 
         match dxc_container {
-            Some(_) => log::debug!("Using DXC for shader compilation"),
-            None => log::debug!("Using FXC for shader compilation"),
+            Some(_) => log::error!("Using DXC for shader compilation"),
+            None => log::error!("Using FXC for shader compilation"),
         }
 
         Ok(Self {
